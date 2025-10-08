@@ -1,6 +1,6 @@
 from tqdm import tqdm
 import argparse
-from openai_request import build_plan_format_conversion_prompt,prompt_chatgpt
+from chatbot_request import build_plan_format_conversion_prompt,prompt_chatbot
 
 
 if __name__ == '__main__':
@@ -10,8 +10,8 @@ if __name__ == '__main__':
     parser.add_argument("--model_name", type=str, default="qwen2.5:7b")
     parser.add_argument("--mode", type=str, default="sole-planning")
     parser.add_argument("--strategy", type=str, default="direct")
-    parser.add_argument("--output_dir", type=str, default="./")
-    parser.add_argument("--tmp_dir", type=str, default="./")
+    parser.add_argument("--output_dir", type=str, default="../outputs/output")
+    parser.add_argument("--tmp_dir", type=str, default="../outputs/tmp")
 
     args = parser.parse_args()
 
@@ -29,8 +29,8 @@ if __name__ == '__main__':
                 assistant_output = str(idx)
                 f.write(assistant_output + '\n')
             continue
-        results, _, price = prompt_chatgpt("You are a helpful assistant.", index=idx, save_path=output_file,
-                                           user_input=prompt, model_name='gpt-4-1106-preview', temperature=0)
+        results, _, price = prompt_chatbot("You are a helpful assistant.", index=idx, save_path=output_file,
+                                           user_input=prompt, model_name='qwen2.5:7b', temperature=0)
         total_price += price
         
     print(f"Parsing Cost:${total_price}")

@@ -1,2 +1,4 @@
 /outputs/
 /database/
+/postprocess/__pycache__
+.DS_Store

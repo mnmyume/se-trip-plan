@@ -8,10 +8,10 @@ import dspy
 
 T = TypeVar('T')
 
-@func_set_timeout(120)
+@func_set_timeout(300)
 def limited_execution_time(lm, prompt, temp=0.7):
     try:
-        return lm(prompt).text
+        return lm(prompt)
     except func_timeout.exceptions.FunctionTimedOut:
         return None
 
@@ -30,8 +30,8 @@ def batchify(data: Iterable[T], batch_size: int) -> Iterable[List[T]]:
     if len(batch) != 0:
         yield batch
 
-def prompt_chatgpt(system_input, user_input, temperature, save_path, index, history=[], model_name='qwen2.5:7b'):
-    lm = dspy.LM(model=f'ollama_chat/{model_name}', api_base='http://localhost:11434')
+def prompt_chatbot(system_input, user_input, temperature, save_path, index, history=[], model_name='qwen2.5:7b'):
+    lm = dspy.LM(model=f'ollama_chat/{model_name}', api_base='http://localhost:11434', api_key="")
     if not history:
         history = [{"role": "system", "content": system_input}]
     history.append({"role": "user", "content": user_input})
@@ -41,7 +41,7 @@ def prompt_chatgpt(system_input, user_input, temperature, save_path, index, hist
         return "", history, 0.0
     history.append({"role": "assistant", "content": response})
     with open(save_path, 'a+', encoding='utf-8') as f:
-        f.write(f"{index}\t{response.replace(chr(10),' ')}\n")
+        f.write(f"{index}\t{response[0].replace(chr(10),' ')}\n")
     return response, history, 0.0
 
 
@@ -331,7 +331,7 @@ def build_plan_format_conversion_prompt(directory, set_type='test',model_name='q
     for idx in tqdm(idx_number_list):
         generated_plan = json.load(open(f'{directory}/{set_type}/generated_plan_{idx}.json'))
         if generated_plan[-1][f'{model_name}{suffix}_{mode}_results'] and generated_plan[-1][f'{model_name}{suffix}_{mode}_results'] != "":
-            prompt = prefix + "Text:\n"+generated_plan[-1][f'{model_name}{suffix}_{mode}_results']+"\nJSON:\n"
+            prompt = prefix + "Text:\n"+generated_plan[-1][f'{model_name}{suffix}_{mode}_results'][0]+"\nJSON:\n"
         else:
             prompt = ""
         prompt_list.append(prompt)

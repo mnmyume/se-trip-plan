@@ -244,7 +244,7 @@ def eval_score(set_type: str, file_path: str):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--set_type", type=str, default="validation")
+    parser.add_argument("--set_type", type=str, default="test")
     parser.add_argument("--evaluation_file_path", type=str, default="./")
     args = parser.parse_args()
 
