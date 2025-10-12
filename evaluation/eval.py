@@ -1,8 +1,8 @@
 import os, sys
 
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "..")))
-from commonsense_constraint import evaluation as commonsense_eval
-from hard_constraint import evaluation as hard_eval
+from evaluation.commonsense_constraint import evaluation as commonsense_eval
+from evaluation.hard_constraint import evaluation as hard_eval
 import json
 from tqdm import tqdm
 from datasets import load_dataset
@@ -67,10 +67,14 @@ def paper_term_mapping(commonsense_constraint_record, hard_constraint_record):
 
 def eval_score(set_type: str, file_path: str):
     if set_type == 'train':
-        query_data_list = load_dataset('osunlp/TravelPlanner', 'train', download_mode="force_redownload")['train']
+        query_data_list = load_dataset('osunlp/TravelPlanner', 'train', download_mode="force_redownload")[
+            'train']
     elif set_type == 'validation':
         query_data_list = load_dataset('osunlp/TravelPlanner', 'validation', download_mode="force_redownload")[
             'validation']
+    elif set_type == 'test':
+        query_data_list = load_dataset('osunlp/TravelPlanner', 'test', download_mode="force_redownload")[
+            'test']
 
     query_data_list = [x for x in query_data_list]
     hardConstraint_statistic = {level: {day: [] for day in [3, 5, 7]} for level in ['easy', 'medium', 'hard']}
@@ -81,11 +85,13 @@ def eval_score(set_type: str, file_path: str):
     for idx in tqdm(range(0, len(query_data_list))):
         query_data = query_data_list[idx]
         tested_plan = tested_plans[idx]
+        breakpoint()
         if type(query_data) == str:
             query_data = eval(query_data)
         if type(tested_plan) == str:
             tested_plan = eval(tested_plan)
         if type(query_data['local_constraint']) == str:
+            breakpoint()
             query_data['local_constraint'] = eval(query_data['local_constraint'])
 
         if tested_plan['plan']:

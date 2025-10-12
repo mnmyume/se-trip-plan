@@ -8,11 +8,11 @@ if __name__ == '__main__':
     
     parser = argparse.ArgumentParser()
     parser.add_argument("--set_type", type=str, default="test")
-    parser.add_argument("--model_name", type=str, default="qwen2.5:7b")
+    parser.add_argument("--model_name", type=str, default="gemma-3-27b-it")
     parser.add_argument("--mode", type=str, default="sole-planning")
     parser.add_argument("--strategy", type=str, default="direct")
-    parser.add_argument("--output_dir", type=str, default="./")
-    parser.add_argument("--tmp_dir", type=str, default="./")
+    parser.add_argument("--output_dir", type=str, default="outputs/output")
+    parser.add_argument("--tmp_dir", type=str, default="outputs/tmp")
 
     args = parser.parse_args()
 

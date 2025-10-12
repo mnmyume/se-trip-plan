@@ -62,7 +62,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--set_type", type=str, default="test")
-    parser.add_argument("--model_name", type=str, default="qwen2.5:7b")
+    parser.add_argument("--model_name", type=str, default="gemma-3-27b-it")
     parser.add_argument("--output_dir", type=str, default="../../outputs/output")
     parser.add_argument("--strategy", type=str, default="direct")
     args = parser.parse_args()

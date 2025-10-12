@@ -5,13 +5,15 @@ import func_timeout
 from func_timeout import func_set_timeout
 from datasets import load_dataset
 import dspy
+from agents.server_llm import serverLLM
+
 
 T = TypeVar('T')
 
 @func_set_timeout(300)
 def limited_execution_time(lm, prompt, temp=0.7):
     try:
-        return lm(prompt)
+        return lm(messages=[{"role": "user", "content": prompt}])
     except func_timeout.exceptions.FunctionTimedOut:
         return None
 
@@ -30,8 +32,13 @@ def batchify(data: Iterable[T], batch_size: int) -> Iterable[List[T]]:
     if len(batch) != 0:
         yield batch
 
-def prompt_chatbot(system_input, user_input, temperature, save_path, index, history=[], model_name='qwen2.5:7b'):
-    lm = dspy.LM(model=f'ollama_chat/{model_name}', api_base='http://localhost:11434', api_key="")
+def prompt_chatbot(system_input, user_input, temperature, save_path, index, history=[], model_name='gemma-3-27b-it'):
+    lm = serverLLM(
+            model_name=model_name,
+            api_url="https://django.cair.mun.ca/llm/v1/chat/completions",
+            api_key="ADAjs78ehDSS87hs3edcf4edr5"
+        )
+    dspy.configure(lm=lm)
     if not history:
         history = [{"role": "system", "content": system_input}]
     history.append({"role": "user", "content": user_input})
@@ -41,7 +48,7 @@ def prompt_chatbot(system_input, user_input, temperature, save_path, index, hist
         return "", history, 0.0
     history.append({"role": "assistant", "content": response})
     with open(save_path, 'a+', encoding='utf-8') as f:
-        f.write(f"{index}\t{response[0].replace(chr(10),' ')}\n")
+        f.write(f"{index}\t{response['completion'].replace(chr(10),' ')}\n")
     return response, history, 0.0
 
 
@@ -280,7 +287,7 @@ JSON\n"""
         prompt_list.append(prompt)
     return prompt_list
 
-def build_plan_format_conversion_prompt(directory, set_type='test',model_name='qwen2.5:7b',strategy='direct',mode='sole-planning'):
+def build_plan_format_conversion_prompt(directory, set_type='test',model_name='gemma-3-27b-it',strategy='direct',mode='sole-planning'):
     prompt_list = []
     prefix = """Please assist me in extracting valid information from a given natural language text and reconstructing it in JSON format, as demonstrated in the following example. If transportation details indicate a journey from one city to another (e.g., from A to B), the 'current_city' should be updated to the destination city (in this case, B). Use a ';' to separate different attractions, with each attraction formatted as 'Name, City'. If there's information about transportation, ensure that the 'current_city' aligns with the destination mentioned in the transportation details (i.e., the current city should follow the format 'from A to B'). Also, ensure that all flight numbers and costs are followed by a colon (i.e., 'Flight Number:' and 'Cost:'), consistent with the provided example. Each item should include ['day', 'current_city', 'transportation', 'breakfast', 'attraction', 'lunch', 'dinner', 'accommodation']. Replace non-specific information like 'eat at home/on the road' with '-'. Additionally, delete any '$' symbols.
 -----EXAMPLE-----
@@ -331,7 +338,7 @@ def build_plan_format_conversion_prompt(directory, set_type='test',model_name='q
     for idx in tqdm(idx_number_list):
         generated_plan = json.load(open(f'{directory}/{set_type}/generated_plan_{idx}.json'))
         if generated_plan[-1][f'{model_name}{suffix}_{mode}_results'] and generated_plan[-1][f'{model_name}{suffix}_{mode}_results'] != "":
-            prompt = prefix + "Text:\n"+generated_plan[-1][f'{model_name}{suffix}_{mode}_results'][0]+"\nJSON:\n"
+            prompt = prefix + "Text:\n"+generated_plan[-1][f'{model_name}{suffix}_{mode}_results']['completion']+"\nJSON:\n"
         else:
             prompt = ""
         prompt_list.append(prompt)
