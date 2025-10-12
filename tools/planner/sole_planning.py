@@ -3,19 +3,12 @@ import re
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "../..")))
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
-from agents.prompts import planner_agent_prompt #, cot_planner_agent_prompt, react_planner_agent_prompt,react_reflect_planner_agent_prompt,reflect_prompt
-# from utils.func import get_valid_name_city,extract_before_parenthesis, extract_numbers_from_filenames
+from agents.prompts import planner_agent_prompt, transportation_agent_prompt, attraction_agent_prompt, accommodation_agent_prompt, restaurant_agent_prompt, combination_agent_prompt
 import json
-import time
-# from langchain.callbacks import get_openai_callback
-
 from tqdm import tqdm
-from tools.planner.apis import Planner #, ReactPlanner, ReactReflectPlanner
-# import openai
+from tools.planner.apis import Planner
 import argparse
 from datasets import load_dataset
-
-
 
 
 def load_line_json_data(filename):
@@ -39,26 +32,7 @@ def extract_numbers_from_filenames(directory):
     return numbers
 
 
-# def catch_openai_api_error():
-#     error = sys.exc_info()[0]
-#     if error == openai.error.APIConnectionError:
-#         print("APIConnectionError")
-#     elif error == openai.error.RateLimitError:
-#         print("RateLimitError")
-#         time.sleep(60)
-#     elif error == openai.error.APIError:
-#         print("APIError")
-#     elif error == openai.error.AuthenticationError:
-#         print("AuthenticationError")
-#     else:
-#         print("API error:", error)
-
-
 if __name__ == "__main__":
-
-    # model_name= ['gpt-3.5-turbo-1106','gpt-4-1106-preview','gemini','mixtral'][1]
-    # set_type = ['dev','test'][0]
-    # strategy = ['direct','cot','react','reflexion'][0]
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--set_type", type=str, default="test")
@@ -76,16 +50,15 @@ if __name__ == "__main__":
     numbers = [i for i in range(1,len(query_data_list)+1)]
 
     if args.strategy == 'direct':
-        planner = Planner(model_name=args.model_name, agent_prompt=planner_agent_prompt)
-    # elif args.strategy == 'cot':
-    #     planner = Planner(model_name=args.model_name, agent_prompt=cot_planner_agent_prompt)
-    # elif args.strategy == 'react':
-    #     planner = ReactPlanner(model_name=args.model_name, agent_prompt=react_planner_agent_prompt)
-    # elif args.strategy == 'reflexion':
-    #     planner = ReactReflectPlanner(model_name=args.model_name, agent_prompt=react_reflect_planner_agent_prompt,reflect_prompt=reflect_prompt)
+        planner = Planner(model_name=args.model_name,
+                          planner_prompt=planner_agent_prompt,
+                          transportation_prompt=transportation_agent_prompt,
+                          attraction_prompt=attraction_agent_prompt,
+                          accommodation_prompt=accommodation_agent_prompt,
+                          restaurant_prompt=restaurant_agent_prompt,
+                          combination_prompt=combination_agent_prompt)
 
 
-    # with get_openai_callback() as cb:
     for number in tqdm(numbers[:]):
 
         query_data = query_data_list[number-1]
@@ -97,7 +70,7 @@ if __name__ == "__main__":
                     planner_results  = planner.run(reference_information, query_data['query'])
                 if planner_results != None:
                     break
-        print(planner_results)
+        print(planner_results[:30])
         # check if the directory exists
         if not os.path.exists(os.path.join(f'{args.output_dir}/{args.set_type}')):
             os.makedirs(os.path.join(f'{args.output_dir}/{args.set_type}'))
@@ -111,4 +84,3 @@ if __name__ == "__main__":
         # write to json file
         with open(os.path.join(f'{args.output_dir}/{args.set_type}/generated_plan_{number}.json'), 'w') as f:
             json.dump(result, f, indent=4)
-    #     print(cb)
