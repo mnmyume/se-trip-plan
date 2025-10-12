@@ -70,7 +70,7 @@ if __name__ == "__main__":
                     planner_results  = planner.run(reference_information, query_data['query'])
                 if planner_results != None:
                     break
-        print(planner_results[:30])
+        print(planner_results.replace("\n", " ")[:100])
         # check if the directory exists
         if not os.path.exists(os.path.join(f'{args.output_dir}/{args.set_type}')):
             os.makedirs(os.path.join(f'{args.output_dir}/{args.set_type}'))
