@@ -50,16 +50,18 @@ if __name__ == "__main__":
     numbers = [i for i in range(1,len(query_data_list)+1)]
 
     if args.strategy == 'direct':
-        planner = Planner(model_name=args.model_name,
-                          planner_prompt=planner_agent_prompt,
+        planner = Planner(planner_prompt=planner_agent_prompt,
                           transportation_prompt=transportation_agent_prompt,
                           attraction_prompt=attraction_agent_prompt,
                           accommodation_prompt=accommodation_agent_prompt,
                           restaurant_prompt=restaurant_agent_prompt,
-                          combination_prompt=combination_agent_prompt)
+                          combination_prompt=combination_agent_prompt,
+                          model_name = args.model_name,
+                          node_mode='separate'  # separate, merge_attra_accom, merge_attra_resta, merge_accom_resta, merge_all
+                          )
 
 
-    for number in tqdm(numbers[:]):
+    for number in tqdm(numbers[:1]):
 
         query_data = query_data_list[number-1]
         reference_information = query_data['reference_information']

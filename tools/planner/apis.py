@@ -46,6 +46,7 @@ class Planner:
                  restaurant_prompt: PromptTemplate = restaurant_agent_prompt,
                  combination_prompt: PromptTemplate = combination_agent_prompt,
                  model_name: str = "gemma-3-27b-it",    # 'qwen2.5:7b'
+                 node_mode: str = "separate",
                  ) -> None:
 
         self.planner_prompt = planner_prompt
@@ -56,6 +57,7 @@ class Planner:
         self.combination_prompt = combination_prompt
         self.scratchpad: str = ''
         self.model_name = model_name
+        self.node_mode = node_mode
         # self.enc = tiktoken.encoding_for_model("gpt-3.5-turbo")
 
         # self.llm = dspy.LM(f"ollama_chat/{model_name}",
@@ -93,9 +95,33 @@ class Planner:
             trans_resp = self.llm(messages=[{"role": "user", "content": trans_prompt}])
             route_prompt = "Route already generated is:" + trans_resp
 
-            attra_resp = self.llm(messages=[{"role": "user", "content": f"{route_prompt} *** {attra_prompt}"}])
-            accom_resp = self.llm(messages=[{"role": "user", "content": f"{route_prompt} *** {accom_prompt}"}])
-            resta_resp = self.llm(messages=[{"role": "user", "content": f"{route_prompt} *** {resta_prompt}"}])
+            if self.node_mode == 'separate':
+                attra_resp = self.llm(messages=[{"role": "user", "content": f"{route_prompt} \n {attra_prompt}"}])
+                accom_resp = self.llm(messages=[{"role": "user", "content": f"{route_prompt} \n {accom_prompt}"}])
+                resta_resp = self.llm(messages=[{"role": "user", "content": f"{route_prompt} \n {resta_prompt}"}])
+
+            elif self.node_mode == "merge_attra_accom":
+                merged_prompt = f"{route_prompt}\n{attra_prompt}\n{accom_prompt}"
+                merged_resp = self.llm(messages=[{"role": "user", "content": merged_prompt}])
+                attra_resp = accom_resp = merged_resp
+                resta_resp = self.llm(messages=[{"role": "user", "content": f"{route_prompt}\n{resta_prompt}"}])
+
+            elif self.node_mode == "merge_attra_resta":
+                merged_prompt = f"{route_prompt}\n{attra_prompt}\n{resta_prompt}"
+                merged_resp = self.llm(messages=[{"role": "user", "content": merged_prompt}])
+                attra_resp = resta_resp = merged_resp
+                accom_resp = self.llm(messages=[{"role": "user", "content": f"{route_prompt}\n{accom_prompt}"}])
+
+            elif self.node_mode == "merge_accom_resta":
+                merged_prompt = f"{route_prompt}\n{accom_prompt}\n{resta_prompt}"
+                merged_resp = self.llm(messages=[{"role": "user", "content": merged_prompt}])
+                accom_resp = resta_resp = merged_resp
+                attra_resp = self.llm(messages=[{"role": "user", "content": f"{route_prompt}\n{attra_prompt}"}])
+
+            elif self.node_mode == "merge_all":
+                merged_prompt = f"{route_prompt}\n{attra_prompt}\n{accom_prompt}\n{resta_prompt}"
+                merged_resp = self.llm(messages=[{"role": "user", "content": merged_prompt}])
+                attra_resp = accom_resp = resta_resp = merged_resp
 
             final_prompt = (f"The separated parts of the trip plan is: "
                        f"1. Transportation plan: {trans_resp}\n"
@@ -105,6 +131,7 @@ class Planner:
                        f"{combi_prompt}")
             final_resp = self.llm(messages=[{"role": "user", "content": final_prompt}])
             return final_resp
+
         except Exception as e:
             return f"LLM Error: {e}"
 
