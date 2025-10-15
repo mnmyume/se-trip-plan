@@ -57,11 +57,11 @@ if __name__ == "__main__":
                           restaurant_prompt=restaurant_agent_prompt,
                           combination_prompt=combination_agent_prompt,
                           model_name = args.model_name,
-                          node_mode='separate'  # separate, merge_attra_accom, merge_attra_resta, merge_accom_resta, merge_all
+                          node_mode='merge_attra_accom'  # separate, merge_attra_accom, merge_attra_resta, merge_accom_resta, merge_all
                           )
 
 
-    for number in tqdm(numbers[:1]):
+    for number in tqdm(numbers[:]):
 
         query_data = query_data_list[number-1]
         reference_information = query_data['reference_information']
