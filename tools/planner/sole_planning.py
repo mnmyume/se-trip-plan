@@ -9,6 +9,7 @@ from tqdm import tqdm
 from tools.planner.apis import Planner
 import argparse
 from datasets import load_dataset
+from utils.metric import metric_benchmark
 
 
 def load_line_json_data(filename):
@@ -39,6 +40,7 @@ if __name__ == "__main__":
     parser.add_argument("--model_name", type=str, default="gemma-3-27b-it")
     parser.add_argument("--output_dir", type=str, default="../../outputs/output")
     parser.add_argument("--strategy", type=str, default="direct")
+    parser.add_argument("--node_mode", type=str, default="separate")    # separate, merge_attra_accom, merge_attra_resta, merge_accom_resta, merge_all
     args = parser.parse_args()
     directory = f'{args.output_dir}/{args.set_type}'
     if args.set_type == 'train':
@@ -57,32 +59,35 @@ if __name__ == "__main__":
                           restaurant_prompt=restaurant_agent_prompt,
                           combination_prompt=combination_agent_prompt,
                           model_name = args.model_name,
-                          node_mode='merge_attra_accom'  # separate, merge_attra_accom, merge_attra_resta, merge_accom_resta, merge_all
+                          node_mode=args.node_mode
                           )
 
+    def sole_planning():
+        for number in tqdm(numbers[:1]):
 
-    for number in tqdm(numbers[:]):
+            query_data = query_data_list[number-1]
+            reference_information = query_data['reference_information']
+            while True:
+                    if args.strategy in ['react','reflexion']:
+                        planner_results, scratchpad  = planner.run(reference_information, query_data['query'])
+                    else:
+                        planner_results  = planner.run(reference_information, query_data['query'])
+                    if planner_results != None:
+                        break
+            print(planner_results.replace("\n", " ")[:100])
+            # check if the directory exists
+            if not os.path.exists(os.path.join(f'{args.output_dir}/{args.set_type}')):
+                os.makedirs(os.path.join(f'{args.output_dir}/{args.set_type}'))
+            if not os.path.exists(os.path.join(f'{args.output_dir}/{args.set_type}/generated_plan_{number}.json')):
+                result =  [{}]
+            else:
+                result = json.load(open(os.path.join(f'{args.output_dir}/{args.set_type}/generated_plan_{number}.json')))
+            if args.strategy in ['react','reflexion']:
+                result[-1][f'{args.model_name}_{args.strategy}_sole-planning_results_logs'] = scratchpad
+            result[-1][f'{args.model_name}_{args.strategy}_sole-planning_results'] = planner_results
+            # write to json file
+            with open(os.path.join(f'{args.output_dir}/{args.set_type}/generated_plan_{number}.json'), 'w') as f:
+                json.dump(result, f, indent=4)
 
-        query_data = query_data_list[number-1]
-        reference_information = query_data['reference_information']
-        while True:
-                if args.strategy in ['react','reflexion']:
-                    planner_results, scratchpad  = planner.run(reference_information, query_data['query'])
-                else:
-                    planner_results  = planner.run(reference_information, query_data['query'])
-                if planner_results != None:
-                    break
-        print(planner_results.replace("\n", " ")[:100])
-        # check if the directory exists
-        if not os.path.exists(os.path.join(f'{args.output_dir}/{args.set_type}')):
-            os.makedirs(os.path.join(f'{args.output_dir}/{args.set_type}'))
-        if not os.path.exists(os.path.join(f'{args.output_dir}/{args.set_type}/generated_plan_{number}.json')):
-            result =  [{}]
-        else:
-            result = json.load(open(os.path.join(f'{args.output_dir}/{args.set_type}/generated_plan_{number}.json')))
-        if args.strategy in ['react','reflexion']:
-            result[-1][f'{args.model_name}_{args.strategy}_sole-planning_results_logs'] = scratchpad
-        result[-1][f'{args.model_name}_{args.strategy}_sole-planning_results'] = planner_results
-        # write to json file
-        with open(os.path.join(f'{args.output_dir}/{args.set_type}/generated_plan_{number}.json'), 'w') as f:
-            json.dump(result, f, indent=4)
+
+    metric_benchmark(sole_planning, args.node_mode)
