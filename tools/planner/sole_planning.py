@@ -68,10 +68,9 @@ if __name__ == "__main__":
             query_data = query_data_list[number-1]
             reference_information = query_data['reference_information']
             while True:
-                    if args.strategy in ['react','reflexion']:
-                        planner_results, scratchpad  = planner.run(reference_information, query_data['query'])
-                    else:
-                        planner_results  = planner.run(reference_information, query_data['query'])
+
+                    planner_results  = planner.run(reference_information, query_data['query'])
+
                     if planner_results != None:
                         break
             print(planner_results.replace("\n", " ")[:100])
