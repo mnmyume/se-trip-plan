@@ -63,7 +63,7 @@ if __name__ == "__main__":
                           )
 
     def sole_planning():
-        for number in tqdm(numbers[:1]):
+        for number in tqdm(numbers[349:449]):
 
             query_data = query_data_list[number-1]
             reference_information = query_data['reference_information']
@@ -81,8 +81,6 @@ if __name__ == "__main__":
                 result =  [{}]
             else:
                 result = json.load(open(os.path.join(f'{args.output_dir}/{args.set_type}/generated_plan_{number}.json')))
-            if args.strategy in ['react','reflexion']:
-                result[-1][f'{args.model_name}_{args.strategy}_sole-planning_results_logs'] = scratchpad
             result[-1][f'{args.model_name}_{args.strategy}_sole-planning_results'] = planner_results
             # write to json file
             with open(os.path.join(f'{args.output_dir}/{args.set_type}/generated_plan_{number}.json'), 'w') as f:

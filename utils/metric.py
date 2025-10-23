@@ -12,11 +12,11 @@ def metric_benchmark(run_fn, label, output_dir="../../utils/results"):
     def sampler():
         while not stop.is_set():
             # cpu usage
-            cpu_samples.append(psutil.cpu_percent(interval=0.5))
-            # cpu frequency (no permission yet)
-            f = psutil.cpu_freq(percpu=False)
-            if f:
-                freq_samples.append(f.current)
+            cpu_samples.append(p.cpu_percent(interval=10))
+            # # cpu frequency (no permission yet)
+            # f = psutil.cpu_freq(percpu=False)
+            # if f:
+            #     freq_samples.append(f.current)
             # memory (MB)
             mem_info = p.memory_info().rss / 1024**2  # RSS = 实际物理内存占用
             mem_samples.append(mem_info)
