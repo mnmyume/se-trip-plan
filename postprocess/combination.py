@@ -1,3 +1,5 @@
+import os
+
 from tqdm import tqdm
 import json
 import argparse
@@ -8,11 +10,12 @@ if __name__ == '__main__':
     
     parser = argparse.ArgumentParser()
     parser.add_argument("--set_type", type=str, default="test")
-    parser.add_argument("--model_name", type=str, default="qwen2.5:7b")
+    parser.add_argument("--model_name", type=str, default="gemma-3-27b-it")
     parser.add_argument("--mode", type=str, default="sole-planning")
     parser.add_argument("--strategy", type=str, default="direct")
     parser.add_argument("--output_dir", type=str, default="./")
     parser.add_argument("--submission_file_dir", type=str, default="./")
+    parser.add_argument("--node_mode", type=str, default="separate")
 
     args = parser.parse_args()
 
@@ -32,12 +35,15 @@ if __name__ == '__main__':
 
     submission_list = []
 
+    output_dir = os.path.join(args.output_dir, args.set_type, args.node_mode)
+    submission_file_dir = os.path.join(args.submission_file_dir, args.set_type, args.node_mode)
+
     for idx in tqdm(idx_number_list):
-        generated_plan = json.load(open(f'{args.output_dir}/{args.set_type}/generated_plan_{idx}.json'))
+        generated_plan = json.load(open(f'{output_dir}/generated_plan_{idx}.json'))
         plan = generated_plan[-1][f'{args.model_name}{suffix}_{args.mode}_parsed_results']
         submission_list.append({"idx":idx,"query":query_data_list[idx-1]['query'],"plan":plan})
     
-    with open(f'{args.submission_file_dir}/{args.set_type}_{args.model_name}{suffix}_{args.mode}_submission.jsonl','w',encoding='utf-8') as w:
+    with open(f'{submission_file_dir}/{args.set_type}_{args.model_name}{suffix}_{args.mode}_submission.jsonl','w',encoding='utf-8') as w:
         for unit in submission_list:
             output = json.dumps(unit)
             w.write(output + "\n")

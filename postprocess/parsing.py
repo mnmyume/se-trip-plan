@@ -1,3 +1,5 @@
+import os
+
 from tqdm import tqdm
 import argparse
 from postprocess.chatbot_request import build_plan_format_conversion_prompt,prompt_chatbot
@@ -6,12 +8,13 @@ from postprocess.chatbot_request import build_plan_format_conversion_prompt,prom
 if __name__ == '__main__':
     
     parser = argparse.ArgumentParser()
-    parser.add_argument("--set_type", type=str, default="test")
+    parser.add_argument("--set_type", type=str, default="validation")
     parser.add_argument("--model_name", type=str, default="gemma-3-27b-it")
     parser.add_argument("--mode", type=str, default="sole-planning")
     parser.add_argument("--strategy", type=str, default="direct")
     parser.add_argument("--output_dir", type=str, default="outputs/output")
     parser.add_argument("--tmp_dir", type=str, default="outputs/tmp")
+    parser.add_argument("--node_mode", type=str, default="separate")
 
     args = parser.parse_args()
 
@@ -19,8 +22,12 @@ if __name__ == '__main__':
         suffix = ''
     elif args.mode == 'sole-planning':
         suffix = f'_{args.strategy}'
-    data = build_plan_format_conversion_prompt(directory=args.output_dir, set_type=args.set_type, model_name=args.model_name, strategy=args.strategy,mode=args.mode)
-    output_file = f'{args.tmp_dir}/{args.set_type}_{args.model_name}{suffix}_{args.mode}.txt'
+
+    output_dir = os.path.join(args.output_dir, args.set_type, args.node_mode)
+    tmp_dir = os.path.join(args.tmp_dir, args.set_type, args.node_mode)
+
+    data = build_plan_format_conversion_prompt(directory=output_dir, set_type=args.set_type, model_name=args.model_name, strategy=args.strategy,mode=args.mode)
+    output_file = f'{tmp_dir}/{args.set_type}_{args.model_name}{suffix}_{args.mode}.txt'
 
     total_price = 0
 

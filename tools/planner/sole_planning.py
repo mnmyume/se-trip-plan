@@ -36,7 +36,7 @@ def extract_numbers_from_filenames(directory):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--set_type", type=str, default="test")
+    parser.add_argument("--set_type", type=str, default="validation")
     parser.add_argument("--model_name", type=str, default="gemma-3-27b-it")
     parser.add_argument("--output_dir", type=str, default="../../outputs/output")
     parser.add_argument("--strategy", type=str, default="direct")
@@ -63,28 +63,30 @@ if __name__ == "__main__":
                           )
 
     def sole_planning():
-        for number in tqdm(numbers[349:449]):
+        query_data = query_data_list[number - 1]
+        reference_information = query_data['reference_information']
+        while True:
 
-            query_data = query_data_list[number-1]
-            reference_information = query_data['reference_information']
-            while True:
+            planner_results = planner.run(reference_information, query_data['query'])
 
-                    planner_results  = planner.run(reference_information, query_data['query'])
-
-                    if planner_results != None:
-                        break
-            print(planner_results.replace("\n", " ")[:100])
-            # check if the directory exists
-            if not os.path.exists(os.path.join(f'{args.output_dir}/{args.set_type}')):
-                os.makedirs(os.path.join(f'{args.output_dir}/{args.set_type}'))
-            if not os.path.exists(os.path.join(f'{args.output_dir}/{args.set_type}/generated_plan_{number}.json')):
-                result =  [{}]
-            else:
-                result = json.load(open(os.path.join(f'{args.output_dir}/{args.set_type}/generated_plan_{number}.json')))
-            result[-1][f'{args.model_name}_{args.strategy}_sole-planning_results'] = planner_results
-            # write to json file
-            with open(os.path.join(f'{args.output_dir}/{args.set_type}/generated_plan_{number}.json'), 'w') as f:
-                json.dump(result, f, indent=4)
+            if planner_results != None:
+                break
+        print(planner_results.replace("\n", " ")[:100])
+        # check if the directory exists
+        if not os.path.exists(os.path.join(f'{args.output_dir}/{args.set_type}')):
+            os.makedirs(os.path.join(f'{args.output_dir}/{args.set_type}'))
+        if not os.path.exists(os.path.join(f'{args.output_dir}/{args.set_type}/generated_plan_{number}.json')):
+            result = [{}]
+        else:
+            result = json.load(open(os.path.join(f'{args.output_dir}/{args.set_type}/generated_plan_{number}.json')))
+        result[-1][f'{args.model_name}_{args.strategy}_sole-planning_results'] = planner_results
+        # write to json file
+        with open(os.path.join(f'{args.output_dir}/{args.set_type}/{args.node_mode}/generated_plan_{number}.json'), 'w') as f:
+            json.dump(result, f, indent=4)
 
 
-    metric_benchmark(sole_planning, args.node_mode)
+    for number in tqdm(numbers[:]):
+        metric_benchmark(sole_planning, args.set_type, args.node_mode)
+
+
+

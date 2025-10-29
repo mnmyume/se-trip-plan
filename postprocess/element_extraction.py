@@ -1,4 +1,6 @@
 import argparse
+import os
+
 from datasets import load_dataset
 from tqdm import tqdm
 import json
@@ -13,6 +15,7 @@ if __name__ == '__main__':
     parser.add_argument("--strategy", type=str, default="direct")
     parser.add_argument("--output_dir", type=str, default="outputs/output")
     parser.add_argument("--tmp_dir", type=str, default="outputs/tmp")
+    parser.add_argument("--node_mode", type=str, default="separate")
 
     args = parser.parse_args()
 
@@ -21,8 +24,10 @@ if __name__ == '__main__':
     elif args.mode == 'sole-planning':
         suffix = f'_{args.strategy}'
 
+    output_dir = os.path.join(args.output_dir, args.set_type, args.node_mode)
+    tmp_dir = os.path.join(args.tmp_dir, args.set_type, args.node_mode)
 
-    results = open(f'{args.tmp_dir}/{args.set_type}_{args.model_name}{suffix}_{args.mode}.txt','r').read().strip().split('\n')
+    results = open(f'{tmp_dir}/{args.set_type}_{args.model_name}{suffix}_{args.mode}.txt','r').read().strip().split('\n')
     
     if args.set_type == 'train':
         query_data_list  = load_dataset('osunlp/TravelPlanner','train')['train']
@@ -33,7 +38,7 @@ if __name__ == '__main__':
 
     idx_number_list = [i for i in range(1,len(query_data_list)+1)]
     for idx in tqdm(idx_number_list[:]):
-        generated_plan = json.load(open(f'{args.output_dir}/{args.set_type}/generated_plan_{idx}.json'))
+        generated_plan = json.load(open(f'{output_dir}/generated_plan_{idx}.json'))
         if generated_plan[-1][f'{args.model_name}{suffix}_{args.mode}_results'] not in ["","Max Token Length Exceeded."] :
             try:
                 result = results[idx-1].split('```json')[1].split('```')[0]
@@ -54,5 +59,5 @@ if __name__ == '__main__':
             else:
                 generated_plan[-1][f'{args.model_name}{suffix}_{args.mode}_parsed_results'] = None
   
-        with open(f'{args.output_dir}/{args.set_type}/generated_plan_{idx}.json','w') as f:
+        with open(f'{output_dir}/generated_plan_{idx}.json','w') as f:
             json.dump(generated_plan,f)

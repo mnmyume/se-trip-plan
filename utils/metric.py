@@ -1,7 +1,7 @@
 import os, json, psutil, time, threading
 from datetime import datetime
 
-def metric_benchmark(run_fn, label, output_dir="../../utils/results"):
+def metric_benchmark(run_fn, set_type, node_mode, output_dir="../../outputs/metrics"):
     os.makedirs(output_dir, exist_ok=True)
     p = psutil.Process(os.getpid())
 
@@ -18,7 +18,7 @@ def metric_benchmark(run_fn, label, output_dir="../../utils/results"):
             # if f:
             #     freq_samples.append(f.current)
             # memory (MB)
-            mem_info = p.memory_info().rss / 1024**2  # RSS = 实际物理内存占用
+            mem_info = p.memory_info().rss / 1024**2  # RSS
             mem_samples.append(mem_info)
 
     # time start
@@ -54,7 +54,7 @@ def metric_benchmark(run_fn, label, output_dir="../../utils/results"):
 
 
     result = {
-        "label": label,
+        "node_mode": node_mode,
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "wall_time_sec": round(wall_time, 3),
         "cpu_time_sec": round(cpu_time, 3),
@@ -70,10 +70,23 @@ def metric_benchmark(run_fn, label, output_dir="../../utils/results"):
         "samples_count": len(cpu_samples)
     }
 
+    filename = os.path.join(output_dir, set_type, node_mode, "metrics_results.json")
 
-    filename = os.path.join(output_dir, f"{label.replace(' ', '_')}.json")
+    if os.path.exists(filename):
+        with open(filename, "r", encoding="utf-8") as f:
+            try:
+                data = json.load(f)
+                if not isinstance(data, list):
+                    data = [data]
+            except json.JSONDecodeError:
+                data = []
+    else:
+        data = []
+
+    data.append(result)
+
     with open(filename, "w", encoding="utf-8") as f:
-        json.dump(result, f, indent=2, ensure_ascii=False)
+        json.dump(data, f, indent=2, ensure_ascii=False)
 
-    print(f"Metrics saved to: {os.path.abspath(filename)}")
+    print(f"Metrics appended to: {os.path.abspath(filename)}")
     return result

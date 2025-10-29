@@ -85,13 +85,11 @@ def eval_score(set_type: str, file_path: str):
     for idx in tqdm(range(0, len(query_data_list))):
         query_data = query_data_list[idx]
         tested_plan = tested_plans[idx]
-        breakpoint()
         if type(query_data) == str:
             query_data = eval(query_data)
         if type(tested_plan) == str:
             tested_plan = eval(tested_plan)
         if type(query_data['local_constraint']) == str:
-            breakpoint()
             query_data['local_constraint'] = eval(query_data['local_constraint'])
 
         if tested_plan['plan']:
@@ -256,9 +254,31 @@ if __name__ == '__main__':
 
     scores, detailed_scores = eval_score(args.set_type, file_path=args.evaluation_file_path)
 
+    summary_scores_formatted = {}
     for key in scores:
-        print(f"{key}: {scores[key] * 100}%")
+        summary_scores_formatted[key] = scores[key]
 
-    print("------------------")
-    print(detailed_scores)
-    print("------------------")
+    data_to_json = {
+        "summary_scores": summary_scores_formatted,
+        "detailed_scores": detailed_scores
+    }
+
+    json_output = json.dumps(data_to_json, indent=4)
+
+    file_name = "scores_report.json"
+
+    try:
+        with open(file_name, 'w', encoding='utf-8') as f:
+            json.dump(data_to_json, f, ensure_ascii=False, indent=4)
+        print(f"Successfully wrote data to {file_name}")
+
+    except IOError as e:
+        print(f"An error occurred while writing the file: {e}")
+
+
+    # for key in scores:
+    #     print(f"{key}: {scores[key] * 100}%")
+    #
+    # print("------------------")
+    # print(detailed_scores)
+    # print("------------------")
