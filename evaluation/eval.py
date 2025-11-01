@@ -65,6 +65,76 @@ def paper_term_mapping(commonsense_constraint_record, hard_constraint_record):
     return remap_commonsense_constraint_record, remap_hard_constraint_record
 
 
+def format_per_query_constraints(plan_constraint_store, query_data_list):
+    """Format per-query constraint results."""
+    per_query_results = {}
+    mapping_dict = {'is_valid_information_in_current_city': 'Within Current City',
+                    'is_valid_information_in_sandbox': 'Within Sandbox',
+                    'is_reasonable_visiting_city': 'Reasonable City Route',
+                    'is_valid_restaurants': 'Diverse Restaurants',
+                    'is_valid_transportation': 'Non-conf. Transportation',
+                    'is_valid_attractions': 'Diverse Attractions', 
+                    'is_valid_accommodation': 'Minimum Nights Stay',
+                    'is_not_absent': 'Complete Information', 
+                    'valid_cost': 'Budget', 
+                    'valid_room_rule': 'Room Rule',
+                    'valid_cuisine': 'Cuisine', 
+                    'valid_room_type': 'Room Type',
+                    'valid_transportation': 'Transportation'}
+    
+    for idx in range(len(query_data_list)):
+        query_data = query_data_list[idx]
+        if type(query_data) == str:
+            query_data = eval(query_data)
+        if type(query_data.get('local_constraint')) == str:
+            query_data['local_constraint'] = eval(query_data['local_constraint'])
+        
+        level = query_data['level']
+        days = query_data['days']
+        query_id = str(idx + 1)  # 1-indexed query IDs
+        
+        # Initialize structure: query_id -> level -> days -> constraints
+        if query_id not in per_query_results:
+            per_query_results[query_id] = {}
+        if level not in per_query_results[query_id]:
+            per_query_results[query_id][level] = {}
+        days_str = str(days)
+        if days_str not in per_query_results[query_id][level]:
+            per_query_results[query_id][level][days_str] = {}
+        
+        # Format Commonsense Constraint
+        if plan_constraint_store[idx]['commonsense_constraint']:
+            commonsense_info = plan_constraint_store[idx]['commonsense_constraint']
+            for constraint_key, constraint_value in commonsense_info.items():
+                if constraint_key in mapping_dict:
+                    mapped_name = mapping_dict[constraint_key]
+                    # Extract boolean value from tuple (first element)
+                    # constraint_value is a tuple like (True/False/None, message)
+                    bool_value = constraint_value[0] if isinstance(constraint_value, (tuple, list)) and len(constraint_value) > 0 else constraint_value
+                    # Convert None to False for JSON serialization clarity, or you can keep None
+                    if bool_value is None:
+                        bool_value = None  # Keep None to distinguish from False
+                    else:
+                        bool_value = bool(bool_value)
+                    per_query_results[query_id][level][days_str][mapped_name] = bool_value
+        
+        # Format Hard Constraint
+        if plan_constraint_store[idx]['hard_constraint']:
+            hard_info = plan_constraint_store[idx]['hard_constraint']
+            for constraint_key, constraint_value in hard_info.items():
+                if constraint_key in mapping_dict:
+                    mapped_name = mapping_dict[constraint_key]
+                    # Extract boolean value from tuple (first element)
+                    bool_value = constraint_value[0] if isinstance(constraint_value, (tuple, list)) and len(constraint_value) > 0 else constraint_value
+                    if bool_value is None:
+                        bool_value = None
+                    else:
+                        bool_value = bool(bool_value)
+                    per_query_results[query_id][level][days_str][mapped_name] = bool_value
+    
+    return per_query_results
+
+
 def eval_score(set_type: str, file_path: str):
     if set_type == 'train':
         query_data_list = load_dataset('osunlp/TravelPlanner', 'train', download_mode="force_redownload")[
@@ -242,8 +312,11 @@ def eval_score(set_type: str, file_path: str):
         result['Hard Constraint Macro Pass Rate'] = final_hardConstraint_cnt / 1000
         result['Final Pass Rate'] = final_all_cnt / 1000
 
+    # Generate per-query constraint results
+    per_query_constraints = format_per_query_constraints(plan_constraint_store, query_data_list)
+    
     return result, {"Commonsense Constraint": remap_commonsense_constraint_record,
-                    "Hard Constraint": remap_hard_constraint_record}
+                    "Hard Constraint": remap_hard_constraint_record}, per_query_constraints
 
 
 if __name__ == '__main__':
@@ -252,7 +325,7 @@ if __name__ == '__main__':
     parser.add_argument("--evaluation_file_path", type=str, default="./")
     args = parser.parse_args()
 
-    scores, detailed_scores = eval_score(args.set_type, file_path=args.evaluation_file_path)
+    scores, detailed_scores, per_query_constraints = eval_score(args.set_type, file_path=args.evaluation_file_path)
 
     summary_scores_formatted = {}
     for key in scores:
@@ -275,10 +348,12 @@ if __name__ == '__main__':
     except IOError as e:
         print(f"An error occurred while writing the file: {e}")
 
+    # Save per-query constraint results
+    per_query_file_name = "per_query_constraints.json"
+    try:
+        with open(per_query_file_name, 'w', encoding='utf-8') as f:
+            json.dump(per_query_constraints, f, ensure_ascii=False, indent=4)
+        print(f"Successfully wrote per-query constraint data to {per_query_file_name}")
+    except IOError as e:
+        print(f"An error occurred while writing the per-query file: {e}")
 
-    # for key in scores:
-    #     print(f"{key}: {scores[key] * 100}%")
-    #
-    # print("------------------")
-    # print(detailed_scores)
-    # print("------------------")
