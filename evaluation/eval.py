@@ -93,14 +93,17 @@ def format_per_query_constraints(plan_constraint_store, query_data_list):
         days = query_data['days']
         query_id = str(idx + 1)  # 1-indexed query IDs
         
-        # Initialize structure: query_id -> level -> days -> constraints
+        # Initialize structure: query_id -> level -> days -> "Commonsense Constraint"/"Hard Constraint" -> constraints
         if query_id not in per_query_results:
             per_query_results[query_id] = {}
         if level not in per_query_results[query_id]:
             per_query_results[query_id][level] = {}
         days_str = str(days)
         if days_str not in per_query_results[query_id][level]:
-            per_query_results[query_id][level][days_str] = {}
+            per_query_results[query_id][level][days_str] = {
+                "Commonsense Constraint": {},
+                "Hard Constraint": {}
+            }
         
         # Format Commonsense Constraint
         if plan_constraint_store[idx]['commonsense_constraint']:
@@ -116,7 +119,7 @@ def format_per_query_constraints(plan_constraint_store, query_data_list):
                         bool_value = None  # Keep None to distinguish from False
                     else:
                         bool_value = bool(bool_value)
-                    per_query_results[query_id][level][days_str][mapped_name] = bool_value
+                    per_query_results[query_id][level][days_str]["Commonsense Constraint"][mapped_name] = bool_value
         
         # Format Hard Constraint
         if plan_constraint_store[idx]['hard_constraint']:
@@ -130,7 +133,7 @@ def format_per_query_constraints(plan_constraint_store, query_data_list):
                         bool_value = None
                     else:
                         bool_value = bool(bool_value)
-                    per_query_results[query_id][level][days_str][mapped_name] = bool_value
+                    per_query_results[query_id][level][days_str]["Hard Constraint"][mapped_name] = bool_value
     
     return per_query_results
 
