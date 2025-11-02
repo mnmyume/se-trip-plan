@@ -67,6 +67,7 @@ def paper_term_mapping(commonsense_constraint_record, hard_constraint_record):
 
 def format_per_query_constraints(plan_constraint_store, query_data_list):
     """Format per-query constraint results."""
+    # Structure: level -> days -> query_id -> constraints
     per_query_results = {}
     mapping_dict = {'is_valid_information_in_current_city': 'Within Current City',
                     'is_valid_information_in_sandbox': 'Within Sandbox',
@@ -82,6 +83,9 @@ def format_per_query_constraints(plan_constraint_store, query_data_list):
                     'valid_room_type': 'Room Type',
                     'valid_transportation': 'Transportation'}
     
+    # List of all hard constraint keys
+    hard_constraint_keys = ['valid_cost', 'valid_room_rule', 'valid_cuisine', 'valid_room_type', 'valid_transportation']
+    
     for idx in range(len(query_data_list)):
         query_data = query_data_list[idx]
         if type(query_data) == str:
@@ -93,20 +97,19 @@ def format_per_query_constraints(plan_constraint_store, query_data_list):
         days = query_data['days']
         query_id = str(idx + 1)  # 1-indexed query IDs
         
-        # Initialize structure: query_id -> level -> days -> "Commonsense Constraint"/"Hard Constraint" -> constraints
-        if query_id not in per_query_results:
-            per_query_results[query_id] = {}
-        if level not in per_query_results[query_id]:
-            per_query_results[query_id][level] = {}
+        # Initialize structure: level -> days -> query_id -> constraints
+        if level not in per_query_results:
+            per_query_results[level] = {}
         days_str = str(days)
-        if days_str not in per_query_results[query_id][level]:
-            per_query_results[query_id][level][days_str] = {
-                "Commonsense Constraint": {},
-                "Hard Constraint": {}
-            }
+        if days_str not in per_query_results[level]:
+            per_query_results[level][days_str] = {}
+        if query_id not in per_query_results[level][days_str]:
+            per_query_results[level][days_str][query_id] = {}
         
         # Format Commonsense Constraint
         if plan_constraint_store[idx]['commonsense_constraint']:
+            if "Commonsense Constraint" not in per_query_results[level][days_str][query_id]:
+                per_query_results[level][days_str][query_id]["Commonsense Constraint"] = {}
             commonsense_info = plan_constraint_store[idx]['commonsense_constraint']
             for constraint_key, constraint_value in commonsense_info.items():
                 if constraint_key in mapping_dict:
@@ -119,9 +122,12 @@ def format_per_query_constraints(plan_constraint_store, query_data_list):
                         bool_value = None  # Keep None to distinguish from False
                     else:
                         bool_value = bool(bool_value)
-                    per_query_results[query_id][level][days_str]["Commonsense Constraint"][mapped_name] = bool_value
+                    per_query_results[level][days_str][query_id]["Commonsense Constraint"][mapped_name] = bool_value
         
-        # Format Hard Constraint
+        # Format Hard Constraint - always include, set to null if not evaluated
+        if "Hard Constraint" not in per_query_results[level][days_str][query_id]:
+            per_query_results[level][days_str][query_id]["Hard Constraint"] = {}
+        
         if plan_constraint_store[idx]['hard_constraint']:
             hard_info = plan_constraint_store[idx]['hard_constraint']
             for constraint_key, constraint_value in hard_info.items():
@@ -133,7 +139,13 @@ def format_per_query_constraints(plan_constraint_store, query_data_list):
                         bool_value = None
                     else:
                         bool_value = bool(bool_value)
-                    per_query_results[query_id][level][days_str]["Hard Constraint"][mapped_name] = bool_value
+                    per_query_results[level][days_str][query_id]["Hard Constraint"][mapped_name] = bool_value
+        else:
+            # Set all hard constraints to null when not evaluated
+            for constraint_key in hard_constraint_keys:
+                if constraint_key in mapping_dict:
+                    mapped_name = mapping_dict[constraint_key]
+                    per_query_results[level][days_str][query_id]["Hard Constraint"][mapped_name] = None
     
     return per_query_results
 
