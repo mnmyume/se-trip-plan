@@ -82,6 +82,7 @@ class Planner:
         # else:
         # return self.llm([HumanMessage(content=self._build_agent_prompt(text, query))]).content
     def run(self, text, query, log_file=None) -> str:
+        planner_prompt = self._build_agent_prompt(self.planner_prompt, text, query)
         trans_prompt = self._build_agent_prompt(self.transportation_prompt, text, query)
         attra_prompt = self._build_agent_prompt(self.attraction_prompt, text, query)
         accom_prompt = self._build_agent_prompt(self.accommodation_prompt, text, query)
@@ -94,6 +95,11 @@ class Planner:
         try:
             trans_resp = self.llm(messages=[{"role": "user", "content": trans_prompt}])
             route_prompt = "Route already generated is:" + trans_resp
+
+
+            if self.node_mode == "base":
+                response = self.llm(messages=[{"role": "user", "content": planner_prompt}])
+                return response
 
             if self.node_mode == 'separate':
                 attra_resp = self.llm(messages=[{"role": "user", "content": f"{route_prompt} \n {attra_prompt}"}])
