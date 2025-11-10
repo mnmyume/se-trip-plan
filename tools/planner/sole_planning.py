@@ -3,7 +3,6 @@ import re
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "../..")))
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
-from agents.prompts import planner_agent_prompt, transportation_agent_prompt, attraction_agent_prompt, accommodation_agent_prompt, restaurant_agent_prompt, combination_agent_prompt
 import json
 from tqdm import tqdm
 from tools.planner.apis import Planner
@@ -40,7 +39,7 @@ if __name__ == "__main__":
     parser.add_argument("--model_name", type=str, default="gemma-3-27b-it")
     parser.add_argument("--output_dir", type=str, default="../../outputs/output")
     parser.add_argument("--strategy", type=str, default="direct")
-    parser.add_argument("--node_mode", type=str, default="tuning")    # separate, merge_attra_accom, merge_attra_resta, merge_accom_resta, merge_all, base
+    parser.add_argument("--node_mode", type=str, default="base")    # base, tuning
     args = parser.parse_args()
     directory = f'{args.output_dir}/{args.set_type}'
     if args.set_type == 'train':
@@ -52,13 +51,7 @@ if __name__ == "__main__":
     numbers = [i for i in range(1,len(query_data_list)+1)]
 
     if args.strategy == 'direct':
-        planner = Planner(planner_prompt=planner_agent_prompt,
-                          transportation_prompt=transportation_agent_prompt,
-                          attraction_prompt=attraction_agent_prompt,
-                          accommodation_prompt=accommodation_agent_prompt,
-                          restaurant_prompt=restaurant_agent_prompt,
-                          combination_prompt=combination_agent_prompt,
-                          model_name = args.model_name,
+        planner = Planner(model_name = args.model_name,
                           node_mode=args.node_mode
                           )
 
@@ -67,7 +60,7 @@ if __name__ == "__main__":
         reference_information = query_data['reference_information']
         while True:
 
-            planner_results = planner.run(reference_information, query_data['query'])
+            planner_results = planner.forward(reference_information, query_data['query'])
 
             if planner_results != None:
                 break
