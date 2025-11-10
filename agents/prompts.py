@@ -219,8 +219,6 @@ combination_agent_prompt = PromptTemplate(
 
 
 class PlannerSignature(dspy.Signature):
-    PLANNER_INSTRUCTION
 
-    text = dspy.InputField(desc="Given information with available flights, hotels, etc.")
-    query = dspy.InputField(desc="The user's travel query.")
+    prompt = dspy.InputField()
     travel_plan = dspy.OutputField(desc="The final, formatted travel plan.", prefix="Travel Plan:")

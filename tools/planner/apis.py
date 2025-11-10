@@ -2,7 +2,7 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "..")))
 from langchain.prompts import PromptTemplate
-from agents.prompts import planner_agent_prompt, transportation_agent_prompt, attraction_agent_prompt, accommodation_agent_prompt, restaurant_agent_prompt, combination_agent_prompt
+from agents.prompts import planner_agent_prompt, transportation_agent_prompt, attraction_agent_prompt, accommodation_agent_prompt, restaurant_agent_prompt, combination_agent_prompt, PlannerSignature
 from agents.server_llm import serverLLM
 
 import dspy
@@ -102,10 +102,13 @@ class Planner:
                 return response
 
             if self.node_mode == "tuning":
-                response = self.llm(messages=[{"role": "user", "content": planner_prompt}])
-                print(response)
                 breakpoint()
-                return response
+                predict = dspy.Predict(PlannerSignature)
+                prediction = predict(prompt=[{"role": "user", "content": planner_prompt}])
+                # response = self.llm(messages=[{"role": "user", "content": planner_prompt}])
+                print(prediction)
+                breakpoint()
+                return prediction
 
             if self.node_mode == 'separate':
                 attra_resp = self.llm(messages=[{"role": "user", "content": f"{route_prompt} \n {attra_prompt}"}])
