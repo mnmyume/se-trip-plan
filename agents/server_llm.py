@@ -40,12 +40,12 @@ class serverLLM(dspy.LM):
         file_path = os.path.join(base_dir, "usage", "token.json")
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
-        # 如果文件不存在 -> 创建并写入列表
+
         if not os.path.exists(file_path):
             with open(file_path, "w", encoding="utf-8") as f:
                 json.dump([usage_data], f, indent=2, ensure_ascii=False)
 
-        # 如果文件存在 -> 读取旧内容，追加，再写回
+
         else:
             with open(file_path, "r", encoding="utf-8") as f:
                 data = json.load(f)

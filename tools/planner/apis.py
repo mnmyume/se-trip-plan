@@ -103,6 +103,8 @@ class Planner:
 
             if self.node_mode == "tuning":
                 response = self.llm(messages=[{"role": "user", "content": planner_prompt}])
+                print(response)
+                breakpoint()
                 return response
 
             if self.node_mode == 'separate':
