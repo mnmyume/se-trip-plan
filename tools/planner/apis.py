@@ -101,6 +101,10 @@ class Planner:
                 response = self.llm(messages=[{"role": "user", "content": planner_prompt}])
                 return response
 
+            if self.node_mode == "tuning":
+                response = self.llm(messages=[{"role": "user", "content": planner_prompt}])
+                return response
+
             if self.node_mode == 'separate':
                 attra_resp = self.llm(messages=[{"role": "user", "content": f"{route_prompt} \n {attra_prompt}"}])
                 accom_resp = self.llm(messages=[{"role": "user", "content": f"{route_prompt} \n {accom_prompt}"}])
