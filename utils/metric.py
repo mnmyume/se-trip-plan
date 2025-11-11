@@ -1,7 +1,7 @@
 import os, json, psutil, time, threading
 from datetime import datetime
 
-def metric_benchmark(run_fn, set_type, node_mode, output_dir="../../outputs/metrics"):
+def metric_benchmark(run_fn, set_type, node_mode, output_dir="outputs/metrics"):
     os.makedirs(output_dir, exist_ok=True)
     p = psutil.Process(os.getpid())
 

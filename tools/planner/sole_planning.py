@@ -1,8 +1,5 @@
 import os
 import re
-import sys
-sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "../..")))
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
 import json
 from tqdm import tqdm
 from tools.planner.apis import Planner
@@ -37,7 +34,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--set_type", type=str, default="validation")
     parser.add_argument("--model_name", type=str, default="gemma-3-27b-it")
-    parser.add_argument("--output_dir", type=str, default="../../outputs/output")
+    parser.add_argument("--output_dir", type=str, default="outputs/output")
     parser.add_argument("--strategy", type=str, default="direct")
     parser.add_argument("--node_mode", type=str, default="base")    # base, tuning
     args = parser.parse_args()

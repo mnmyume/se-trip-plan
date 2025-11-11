@@ -21,13 +21,14 @@ class Planner(dspy.Module):
         # self.enc = tiktoken.encoding_for_model("gpt-3.5-turbo")
 
         self.llm = serverLLM(
-            model_name=model_name,
-            api_url="https://django.cair.mun.ca/llm/v1/chat/completions",
-            api_key="ADAjs78ehDSS87hs3edcf4edr5"
+            base_url="https://django.cair.mun.ca/llm/v1/chat/completions",
+            model="model_name",
+            api_key="ADAjs78ehDSS87hs3edcf4edr5",
         )
         # response = self.llm(messages=[{"role": "user", "content": "how are you?"}])
         dspy.configure(lm=self.llm)
         print(f"PlannerAgent {model_name} loaded.")
+        dspy.configure(adapter=dspy.adapters.ChatAdapter())
 
         self.predict = dspy.Predict(PlannerSignature)
 

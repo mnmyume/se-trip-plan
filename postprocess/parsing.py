@@ -14,7 +14,7 @@ if __name__ == '__main__':
     parser.add_argument("--strategy", type=str, default="direct")
     parser.add_argument("--output_dir", type=str, default="outputs/output")
     parser.add_argument("--tmp_dir", type=str, default="outputs/tmp")
-    parser.add_argument("--node_mode", type=str, default="separate")
+    parser.add_argument("--node_mode", type=str, default="base")
 
     args = parser.parse_args()
 
@@ -28,6 +28,7 @@ if __name__ == '__main__':
 
     data = build_plan_format_conversion_prompt(directory=output_dir, set_type=args.set_type, model_name=args.model_name, strategy=args.strategy,mode=args.mode)
     output_file = f'{tmp_dir}/{args.set_type}_{args.model_name}{suffix}_{args.mode}.txt'
+
 
     total_price = 0
 
