@@ -2,7 +2,7 @@ import os
 import re
 import json
 from tqdm import tqdm
-from tools.planner.apis import Planner
+from tools.planner.apis import Planner, IndieAccomPlanner
 import argparse
 from datasets import load_dataset
 from utils.metric import metric_benchmark
@@ -47,10 +47,14 @@ if __name__ == "__main__":
         query_data_list  = load_dataset('osunlp/TravelPlanner','test')['test']
     numbers = [i for i in range(1,len(query_data_list)+1)]
 
-    if args.strategy == 'direct':
+    if args.node_mode == 'base':
         planner = Planner(model_name = args.model_name,
                           node_mode=args.node_mode
                           )
+    if args.node_mode == 'indie_accom':
+        planner = IndieAccomPlanner(model_name=args.model_name,
+                                    node_mode=args.node_mode
+                                    )
 
     def sole_planning():
         query_data = query_data_list[number - 1]

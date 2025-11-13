@@ -34,9 +34,9 @@ def batchify(data: Iterable[T], batch_size: int) -> Iterable[List[T]]:
 
 def prompt_chatbot(system_input, user_input, temperature, save_path, index, history=[], model_name='gemma-3-27b-it'):
     lm = serverLLM(
-            model_name=model_name,
-            api_url="https://django.cair.mun.ca/llm/v1/chat/completions",
-            api_key="ADAjs78ehDSS87hs3edcf4edr5"
+            base_url="https://django.cair.mun.ca/llm/v1/chat/completions",
+            model="gemma-3-27b-it",
+            api_key="ADAjs78ehDSS87hs3edcf4edr5",
         )
     dspy.configure(lm=lm)
     if not history:
@@ -48,7 +48,8 @@ def prompt_chatbot(system_input, user_input, temperature, save_path, index, hist
         return "", history, 0.0
     history.append({"role": "assistant", "content": response})
     with open(save_path, 'a+', encoding='utf-8') as f:
-        f.write(f"{index}\t{response.replace(chr(10),' ')}\n")
+        content = response[0]["text"]
+        f.write(f"{index}\t{content.replace(chr(10),' ')}\n")
     return response, history, 0.0
 
 

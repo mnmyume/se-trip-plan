@@ -6,7 +6,7 @@ import json
 
 
 class serverLLM(dspy.BaseLM):
-    def __init__(self, base_url, model, api_key, temperature=0.7, max_tokens=256):
+    def __init__(self, base_url, model, api_key, temperature=1, max_tokens=128000):
         self.base_url = base_url
         self.model = model
         self.api_key = api_key

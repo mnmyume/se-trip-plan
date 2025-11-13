@@ -41,4 +41,31 @@ class PlannerSignature(dspy.Signature):
 
     text = dspy.InputField(desc="Given information")
     query = dspy.InputField()
+    accommodation = dspy.InputField(desc="Use this accommodation plan if provided")
     travel_plan = dspy.OutputField(desc="The final travel plan.", prefix="Travel Plan:")
+
+
+class AccommodationSignature(dspy.Signature):
+    """
+    Please give me a detailed accommodation plan. Note that all the information in your plan should be derived from the provided data. You must adhere to the format given in the example. Additionally, all details should align with commonsense. The symbol '-' indicates that information is unnecessary. For example, in the provided sample, you do not need to plan after returning to the departure city. When you travel to two cities in one day, you should note it in the 'Current City' section as in the example (i.e., from A to B).
+
+    ***** Example *****
+    Accommodation Plan:
+    Day 1:
+    Current City: from Ithaca to Charlotte
+    Accommodation: Affordable Spacious Refurbished Room in Bushwick!, Charlotte
+
+    Day 2:
+    Current City: Charlotte
+    Accommodation: Affordable Spacious Refurbished Room in Bushwick!, Charlotte
+
+    Day 3:
+    Current City: from Charlotte to Ithaca
+    Accommodation: -
+
+    ***** Example Ends *****
+    """
+
+    text = dspy.InputField(desc="Only use Accommodation Information. Pay attention to minimum night stay.")
+    query = dspy.InputField()
+    travel_plan = dspy.OutputField(desc="The accommodation plan", prefix="Travel Plan:")
