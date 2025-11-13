@@ -2,6 +2,7 @@ import requests
 import dspy
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+import json
 
 
 class serverLLM(dspy.BaseLM):
@@ -39,7 +40,11 @@ class serverLLM(dspy.BaseLM):
         response.raise_for_status()
         data = response.json()
 
-        return data["choices"][0]["message"]["content"].strip()
+        content = data["choices"][0]["message"]["content"].strip()
+        return [{"travel_plan": "",
+                 "text":content
+                }]
+
 
     def __call__(self, *args, **kwargs):
 

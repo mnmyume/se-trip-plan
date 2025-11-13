@@ -28,7 +28,6 @@ class Planner(dspy.Module):
         # response = self.llm(messages=[{"role": "user", "content": "how are you?"}])
         dspy.configure(lm=self.llm)
         print(f"PlannerAgent {model_name} loaded.")
-        dspy.configure(adapter=dspy.adapters.ChatAdapter())
 
         self.predict = dspy.Predict(PlannerSignature)
 
@@ -39,7 +38,6 @@ class Planner(dspy.Module):
 
             if self.node_mode == "base":
                 response = self.predict(text=text, query=query)
-                print(response)
                 return response
 
             if self.node_mode == "tuning":

@@ -41,4 +41,4 @@ class PlannerSignature(dspy.Signature):
 
     text = dspy.InputField(desc="Given information")
     query = dspy.InputField()
-    travel_plan = dspy.OutputField(desc="The final, formatted travel plan.", prefix="Travel Plan:")
+    travel_plan = dspy.OutputField(desc="The final travel plan.", prefix="Travel Plan:")

@@ -61,7 +61,7 @@ if __name__ == "__main__":
 
             if planner_results != None:
                 break
-        print(planner_results.replace("\n", " ")[:100])
+        # print(planner_results.replace("\n", " ")[:100])
         # check if the directory exists
         if not os.path.exists(os.path.join(f'{args.output_dir}/{args.set_type}')):
             os.makedirs(os.path.join(f'{args.output_dir}/{args.set_type}'))
@@ -69,7 +69,7 @@ if __name__ == "__main__":
             result = [{}]
         else:
             result = json.load(open(os.path.join(f'{args.output_dir}/{args.set_type}/generated_plan_{number}.json')))
-        result[-1][f'{args.model_name}_{args.strategy}_sole-planning_results'] = planner_results
+        result[-1][f'{args.model_name}_{args.strategy}_sole-planning_results'] = planner_results.travel_plan
         # write to json file
         with open(os.path.join(f'{args.output_dir}/{args.set_type}/{args.node_mode}/generated_plan_{number}.json'), 'w') as f:
             json.dump(result, f, indent=4)

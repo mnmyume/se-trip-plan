@@ -1,0 +1,54 @@
+{
+  "predict": {
+    "traces": [],
+    "train": [],
+    "demos": [
+      {
+        "augmented": true,
+        "question": "The average score on last week's Spanish test was 90.  Marco scored 10% less than the average test score and Margaret received 5 more points than Marco.  What score did Margaret receive on her test?",
+        "reasoning": "First, find Marco's score by calculating 10% of the average score (90) and subtracting that from the average score. 10% of 90 is 9, so Marco scored 90 - 9 = 81. Next, find Margaret's score by adding 5 to Marco's score. Margaret scored 81 + 5 = 86.",
+        "answer": "86"
+      },
+      {
+        "question": "Today, at the school science lesson, Jake learned that there are 8 more solar systems for every planet in the galaxy. If there are 20 planets in the galaxy, how many solar systems and planets are there altogether?",
+        "gold_reasoning": "If there are 8 more solar systems for every planet in the galaxy, there are 8+1 = <<8+1=9>>9 solar systems for every planet. Since the number of planets is 20, there are 20*9 = <<20*9=180>>180 solar systems in the galaxy. Altogether, there are 180+20 = <<180+20=200>>200 solar systems and planets in the galaxy.",
+        "answer": "200"
+      },
+      {
+        "question": "A tank contains 6000 liters of water, 2000 liters evaporated, and then 3500 liters were drained by Bob. How many liters are in the tank if it now rains for 30 minutes and every 10 minutes 350 liters of rain are added to the tank?",
+        "gold_reasoning": "After the first evaporation, the water tank has 6000 liters - 2000 liters = <<6000-2000=4000>>4000 liters. After the second extraction, the water tank has 4000 liters - 3500 liters= <<4000-3500=500>>500 liters The tank is refilled with rain 30 minutes \/ 10 minutes = <<30\/10=3>>3 times The amount of water refilled with rain is 3 times * 350 liters per time = <<3*350=1050>>1050 liters. With the additional rainwater, the water tank has 500 liters + 1050 liters = <<500+1050=1550>>1550 liters.",
+        "answer": "1550"
+      },
+      {
+        "question": "Tom's rabbit can run at 25 miles per hour.  His cat can run 20 miles per hour.  The cat gets a 15-minute head start.  In hours, how long will it take for the rabbit to catch up?",
+        "gold_reasoning": "The cat got a 15\/60=<<15\/60=.25>>.25 hour head start That means it ran 20*.25=<<20*.25=5>>5 miles The rabbit goes 25-20=<<25-20=5>>5 mph faster than the cat So it takes 5\/5=<<5\/5=1>>1 hour for the rabbit to catch up",
+        "answer": "1"
+      }
+    ],
+    "signature": {
+      "instructions": "You are an expert mathematical problem solver. Given a word problem (`question`), break it down into a series of logical steps, performing calculations as needed. Present your reasoning clearly, showing each step with its corresponding calculation enclosed in double angle brackets (e.g., <12 + 5>). Finally, provide the numerical answer to the problem. Ensure your reasoning is detailed enough to easily follow the solution.",
+      "fields": [
+        {
+          "prefix": "Question:",
+          "description": "${question}"
+        },
+        {
+          "prefix": "Reasoning: Let's think step by step in order to",
+          "description": "${reasoning}"
+        },
+        {
+          "prefix": "Answer:",
+          "description": "${answer}"
+        }
+      ]
+    },
+    "lm": null
+  },
+  "metadata": {
+    "dependency_versions": {
+      "python": "3.9",
+      "dspy": "2.6.27",
+      "cloudpickle": "3.1"
+    }
+  }
+}
