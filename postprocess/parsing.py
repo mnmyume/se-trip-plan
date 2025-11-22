@@ -14,7 +14,7 @@ if __name__ == '__main__':
     parser.add_argument("--strategy", type=str, default="direct")
     parser.add_argument("--output_dir", type=str, default="outputs/output")
     parser.add_argument("--tmp_dir", type=str, default="outputs/tmp")
-    parser.add_argument("--node_mode", type=str, default="base")
+    parser.add_argument("--node_mode", type=str, default="1")
 
     args = parser.parse_args()
 

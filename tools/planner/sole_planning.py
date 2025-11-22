@@ -33,7 +33,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--set_type", type=str, default="validation")
-    parser.add_argument("--model_name", type=str, default="gemma-3-27b-it")
+    parser.add_argument("--model_name", type=str, default="qwen3:1.7b")
     parser.add_argument("--output_dir", type=str, default="outputs/output")
     parser.add_argument("--strategy", type=str, default="direct")
     parser.add_argument("--node_mode", type=str, default="base")    # base, tuning
@@ -79,7 +79,7 @@ if __name__ == "__main__":
             json.dump(result, f, indent=4)
 
 
-    for number in tqdm(numbers[:]):
+    for number in tqdm(numbers[:2]):
         metric_benchmark(sole_planning, args.set_type, args.node_mode)
 
 

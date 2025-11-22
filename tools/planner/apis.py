@@ -2,8 +2,7 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "..")))
 from langchain.prompts import PromptTemplate
-from agents.prompts import PlannerSignature, AccommodationSignature
-from agents.server_llm import serverLLM
+from agents.prompts import JSONPlannerSignature, PlannerSignature, AccommodationSignature
 
 import dspy
 
@@ -11,7 +10,7 @@ import dspy
 class Planner(dspy.Module):
     def __init__(self,
                  # args,
-                 model_name: str = "gemma-3-27b-it",
+                 model_name: str = "qwen3:1.7b",
                  node_mode: str = "base",
                  ) -> None:
 
@@ -20,16 +19,12 @@ class Planner(dspy.Module):
         self.node_mode = node_mode
         # self.enc = tiktoken.encoding_for_model("gpt-3.5-turbo")
 
-        self.llm = serverLLM(
-            base_url="https://django.cair.mun.ca/llm/v1/chat/completions",
-            model="gemma-3-27b-it",
-            api_key="ADAjs78ehDSS87hs3edcf4edr5",
-        )
-        # response = self.llm(messages=[{"role": "user", "content": "how are you?"}])
+        self.llm = dspy.LM(f"ollama_chat/{model_name}", api_base="http://localhost:11434", api_key="")
+
         dspy.configure(lm=self.llm)
         print(f"PlannerAgent {model_name} loaded.")
 
-        self.predict = dspy.Predict(PlannerSignature)
+        self.predict = dspy.Predict(JSONPlannerSignature)
 
     def forward(self, text, query, log_file=None) -> str:
 
@@ -53,12 +48,9 @@ class IndieAccomPlanner(dspy.Module):
         self.node_mode = node_mode
         # self.enc = tiktoken.encoding_for_model("gpt-3.5-turbo")
 
-        self.llm = serverLLM(
-            base_url="https://django.cair.mun.ca/llm/v1/chat/completions",
-            model="model_name",
-            api_key="ADAjs78ehDSS87hs3edcf4edr5",
-        )
-        # response = self.llm(messages=[{"role": "user", "content": "how are you?"}])
+        self.llm = dspy.LM(f"ollama_chat/{model_name}", api_base="http://localhost:11434", api_key="")
+
+
         dspy.configure(lm=self.llm)
         print(f"PlannerAgent {model_name} loaded.")
 

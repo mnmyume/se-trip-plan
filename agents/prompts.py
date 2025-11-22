@@ -1,6 +1,22 @@
 import dspy
 
 
+class JSONPlannerSignature(dspy.Signature):
+    """
+        You are a proficient planner. Based on the provided information and query, please give me a detailed plan, including specifics such as flight numbers (e.g., F0123456), restaurant names, and accommodation names. Note that all the information in your plan should be derived from the provided data. You must adhere to the format given in the example. Additionally, all details should align with commonsense. The symbol '-' indicates that information is unnecessary. For example, in the provided sample, you do not need to plan after returning to the departure city. When you travel to two cities in one day, you should note it in the 'Current City' section as in the example (i.e., from A to B).
+
+        ***** Example *****
+        {"idx": 1, "query": "Please create a travel plan for me where I'll be departing from Washington and heading to Myrtle Beach for a 3-day trip from March 13th to March 15th, 2022. Can you help me keep this journey within a budget of $1,400?", "plan": [{"days": 1, "current_city": "from Washington to Myrtle Beach", "transportation": "Flight Number: F3792603, from Washington to Myrtle Beach, Departure Time: 09:19, Arrival Time: 10:59, Cost: 164", "breakfast": "-", "attraction": "SkyWheel Myrtle Beach, Myrtle Beach;", "lunch": "-", "dinner": "Exotic India, Myrtle Beach", "accommodation": "Cozy Brooklyn Room - Next to Pratt Institute, Myrtle Beach"}, {"days": 2, "current_city": "Myrtle Beach", "transportation": "-", "breakfast": "First Eat, Myrtle Beach", "attraction": "WonderWorks Myrtle Beach, Myrtle Beach;Family Kingdom Amusement Park, Myrtle Beach;Hollywood Wax Museum, Myrtle Beach;", "lunch": "La Pino'z Pizza, Myrtle Beach", "dinner": "Twigly, Myrtle Beach", "accommodation": "Cozy Brooklyn Room - Next to Pratt Institute, Myrtle Beach"}, {"days": 3, "current_city": "from Myrtle Beach to Washington", "transportation": "Flight Number: F3791200, from Myrtle Beach to Washington, Departure Time: 11:36, Arrival Time: 13:06, Cost: 87", "breakfast": "Kedarnath Prem Chand Halwai, Myrtle Beach", "attraction": "-", "lunch": "-", "dinner": "-", "accommodation": "-"}]}
+
+
+        ***** Example Ends *****
+        """
+
+    text = dspy.InputField(desc="Given information")
+    query = dspy.InputField()
+    travel_plan = dspy.OutputField(desc="Generate in JSON format.")
+
+
 class PlannerSignature(dspy.Signature):
     """
     You are a proficient planner. Based on the provided information and query, please give me a detailed plan, including specifics such as flight numbers (e.g., F0123456), restaurant names, and accommodation names. Note that all the information in your plan should be derived from the provided data. You must adhere to the format given in the example. Additionally, all details should align with commonsense. The symbol '-' indicates that information is unnecessary. For example, in the provided sample, you do not need to plan after returning to the departure city. When you travel to two cities in one day, you should note it in the 'Current City' section as in the example (i.e., from A to B).
@@ -41,7 +57,6 @@ class PlannerSignature(dspy.Signature):
 
     text = dspy.InputField(desc="Given information")
     query = dspy.InputField()
-    accommodation = dspy.InputField(desc="Use this accommodation plan if provided")
     travel_plan = dspy.OutputField(desc="The final travel plan.", prefix="Travel Plan:")
 
 
